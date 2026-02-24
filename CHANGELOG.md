@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.5.4 - 2026-02-24
+
+- Fixed spacing under `Active` toggle in integration modal (row-level margin for stable rendering).
+- Kept footer as a single plain text line at the bottom of the form:
+  - `Copyright 2026 Sales Snap. Alexander Zlobin All Rights Reserved.`
+- Patch-only version bump.
+
+## 1.5.3 - 2026-02-24
+
+- Adjusted integration modal layout to match requested spacing after Active switch.
+- Replaced footer with one plain text line:
+  - `Copyright 2026 Sales Snap. Alexander Zlobin All Rights Reserved.`
+- Patch-only version bump.
+
 ## 1.5.2 - 2026-02-24
 
 - Updated plugin tile icon to transparent/light style based on provided `pngegg.png`.

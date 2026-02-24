@@ -54,7 +54,12 @@ class SendgridCallbackIntegration extends AbstractIntegration
         $builder->add('sendgrid_callback_handle_bounce', YesNoButtonGroupType::class, [
             'label' => 'sendgrid_callback.config.handle_bounce',
             'data'  => $this->toBool($data['sendgrid_callback_handle_bounce'] ?? true),
-            'attr'  => ['tooltip' => 'sendgrid_callback.config.handle_bounce.tooltip'],
+            'row_attr' => [
+                'style' => 'margin-top: 30px;',
+            ],
+            'attr'  => [
+                'tooltip' => 'sendgrid_callback.config.handle_bounce.tooltip',
+            ],
         ]);
 
         $builder->add('sendgrid_callback_handle_blocked', YesNoButtonGroupType::class, [
@@ -108,12 +113,12 @@ class SendgridCallbackIntegration extends AbstractIntegration
             'label'      => false,
             'required'   => false,
             'mapped'     => false,
-            'data'       => 'Sales Snap, Alexander Zlobin, 2026',
+            'data'       => 'Copyright 2026 Sales Snap. Alexander Zlobin All Rights Reserved.',
             'label_attr' => ['class' => 'control-label sr-only'],
             'attr'       => [
-                'class'    => 'form-control',
+                'class'    => '',
                 'readonly' => true,
-                'style'    => 'margin-top: 8px; border: 0; background: transparent; padding-left: 0; font-weight: 600;',
+                'style'    => 'margin-top: 70px; border: 0; background: transparent; padding-left: 0; box-shadow: none; font-weight: 500; color: #4a4a4a; pointer-events: none;',
             ],
         ]);
     }

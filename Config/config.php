@@ -57,7 +57,7 @@ return [
     'name'        => 'SendGrid Callback',
     'description' => 'SendGrid callback processing for Mautic. Company: Sales Snap. Author: Alexander Zlobin. Copyright (c) Sales Snap.',
     'author'      => 'Alexander Zlobin',
-    'version'     => '1.5.2',
+    'version'     => '1.5.4',
     'services'    => [
         'integrations' => [
             'mautic.integration.sendgridcallback' => [
