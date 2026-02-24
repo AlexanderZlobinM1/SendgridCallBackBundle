@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.2 - 2026-02-24
+
+- Updated plugin tile icon to transparent/light style based on provided `pngegg.png`.
+- Patch-only version bump.
+
 ## 1.5.1 - 2026-02-24
 
 - Added explicit integration icon override via `getIcon()` to force tile icon path.
