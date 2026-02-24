@@ -1,0 +1,42 @@
+<div class="box-layout">
+    <div class="col-md-12 height-auto">
+        <div class="row">
+            <div class="panel panel-default mb-md">
+                <div class="panel-body">
+                    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                        <img src="{{ asset('plugins/SendgridCallbackBundle/Assets/images/sendgrid-logo.svg') }}" alt="SendGrid" style="max-height:54px;" />
+                        <h3 class="mb-0">{{ 'sendgrid_callback.settings.title'|trans }}</h3>
+                    </div>
+                    <p class="mt-md mb-lg">{{ 'sendgrid_callback.settings.description'|trans }}</p>
+
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>{{ 'sendgrid_callback.settings.option'|trans }}</th>
+                            <th>{{ 'sendgrid_callback.settings.value'|trans }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr><td>Bounce</td><td>{{ settings.handle_bounce ? 'Enabled' : 'Disabled' }}</td></tr>
+                        <tr><td>Blocked</td><td>{{ settings.handle_blocked ? 'Enabled' : 'Disabled' }}</td></tr>
+                        <tr><td>Dropped</td><td>{{ settings.handle_dropped ? 'Enabled' : 'Disabled' }}</td></tr>
+                        <tr><td>Spamreport</td><td>{{ settings.handle_spamreport ? 'Enabled' : 'Disabled' }}</td></tr>
+                        <tr><td>Unsubscribe</td><td>{{ settings.handle_unsubscribe ? 'Enabled' : 'Disabled' }}</td></tr>
+                        <tr><td>Group unsubscribe</td><td>{{ settings.handle_group_unsubscribe ? 'Enabled' : 'Disabled' }}</td></tr>
+                        <tr><td>Dropped policy</td><td>{{ settings.dropped_policy }}</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="mt-lg" style="display:flex;align-items:center;gap:12px;">
+                        <img src="{{ asset('plugins/SendgridCallbackBundle/Assets/images/salessnap-author-logo.svg') }}" alt="Sales Snap" style="width:36px;height:36px;" />
+                        <div>
+                            <div><strong>{{ 'sendgrid_callback.about.company'|trans }}</strong>: Sales Snap</div>
+                            <div><strong>{{ 'sendgrid_callback.about.author'|trans }}</strong>: Alexander Zlobin</div>
+                            <div class="text-muted mt-xs">{{ 'sendgrid_callback.about.copyright'|trans }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

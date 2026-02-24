@@ -4,6 +4,9 @@ Plugin for Mautic 5/6/7 to process SendGrid Event Webhook callbacks and mark con
 
 This plugin does not send email. Email sending is handled by Symfony's standard SendGrid mailer transport configured in Mautic.
 
+Company: Sales Snap  
+Author: Alexander Zlobin
+
 ## Supported mailer schemes
 
 - `sendgrid`
@@ -57,6 +60,12 @@ https://mautic.example.com/mailer/callback
 - Dropped
 - Spam Reports
 - Unsubscribes
+
+5. Open plugin settings in Mautic menu:
+
+- `SendGrid -> Callback Settings`
+
+There you can safely enable/disable each event type and choose dropped-event mapping policy from a fixed list (`auto`, `bounced`, `unsubscribed`).
 
 ## Notes
 

@@ -80,9 +80,62 @@ class CallbackSubscriberTest extends TestCase
         self::assertSame(0, $this->invokeProcessPayload($subscriber, [$eventPayload]));
     }
 
-    private function createSubscriber(TransportCallback $transportCallback): CallbackSubscriber
+    public function testDisabledBounceEventIgnored(): void
+    {
+        $transportCallback = $this->createMock(TransportCallback::class);
+        $transportCallback
+            ->expects(self::never())
+            ->method('addFailureByAddress');
+
+        $subscriber = $this->createSubscriber($transportCallback, [
+            'sendgrid_callback_handle_bounce' => false,
+        ]);
+
+        $eventPayload = [
+            'event'  => 'bounce',
+            'email'  => 'john.doe@example.com',
+            'reason' => 'mailbox not found',
+        ];
+
+        self::assertSame(0, $this->invokeProcessPayload($subscriber, [$eventPayload]));
+    }
+
+    public function testDroppedPolicyCanForceUnsubscribed(): void
+    {
+        $transportCallback = $this->createMock(TransportCallback::class);
+        $transportCallback
+            ->expects(self::once())
+            ->method('addFailureByAddress')
+            ->with(
+                'john.doe@example.com',
+                self::stringContains('mailbox full'),
+                DoNotContact::UNSUBSCRIBED,
+                null
+            );
+
+        $subscriber = $this->createSubscriber($transportCallback, [
+            'sendgrid_callback_dropped_policy' => 'unsubscribed',
+        ]);
+
+        $eventPayload = [
+            'event'  => 'dropped',
+            'email'  => 'john.doe@example.com',
+            'reason' => 'mailbox full',
+        ];
+
+        self::assertSame(1, $this->invokeProcessPayload($subscriber, [$eventPayload]));
+    }
+
+    /**
+     * @param array<string, mixed> $config
+     */
+    private function createSubscriber(TransportCallback $transportCallback, array $config = []): CallbackSubscriber
     {
         $coreParametersHelper = $this->createMock(CoreParametersHelper::class);
+        $coreParametersHelper
+            ->method('get')
+            ->willReturnCallback(static fn (string $key, mixed $default = null) => $config[$key] ?? $default);
+
         $logger               = $this->createMock(LoggerInterface::class);
 
         return new CallbackSubscriber($transportCallback, $coreParametersHelper, $logger);

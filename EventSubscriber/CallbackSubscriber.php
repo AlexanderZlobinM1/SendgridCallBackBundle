@@ -18,6 +18,8 @@ use Symfony\Component\Mime\Address;
 
 class CallbackSubscriber implements EventSubscriberInterface
 {
+    private const SUPPORTED_DROPPED_POLICIES = ['auto', 'bounced', 'unsubscribed'];
+
     public function __construct(
         private TransportCallback $transportCallback,
         private CoreParametersHelper $coreParametersHelper,
@@ -115,7 +117,7 @@ class CallbackSubscriber implements EventSubscriberInterface
         $eventType = strtolower((string) ($payload['event'] ?? ''));
         $email     = (string) ($payload['email'] ?? '');
 
-        if ('' === $eventType || '' === $email) {
+        if ('' === $eventType || '' === $email || !$this->isEventEnabled($eventType)) {
             return 0;
         }
 
@@ -193,12 +195,71 @@ class CallbackSubscriber implements EventSubscriberInterface
 
     private function resolveDroppedReason(string $reason): int
     {
+        $policy = strtolower((string) ($this->coreParametersHelper->get('sendgrid_callback_dropped_policy') ?? 'auto'));
+        if (!in_array($policy, self::SUPPORTED_DROPPED_POLICIES, true)) {
+            $policy = 'auto';
+        }
+
+        if ('bounced' === $policy) {
+            return DoNotContact::BOUNCED;
+        }
+
+        if ('unsubscribed' === $policy) {
+            return DoNotContact::UNSUBSCRIBED;
+        }
+
         $normalizedReason = strtolower($reason);
         if (str_contains($normalizedReason, 'unsubscribe') || str_contains($normalizedReason, 'spam')) {
             return DoNotContact::UNSUBSCRIBED;
         }
 
         return DoNotContact::BOUNCED;
+    }
+
+    private function isEventEnabled(string $eventType): bool
+    {
+        $parameterMap = [
+            'bounce'            => 'sendgrid_callback_handle_bounce',
+            'blocked'           => 'sendgrid_callback_handle_blocked',
+            'dropped'           => 'sendgrid_callback_handle_dropped',
+            'spamreport'        => 'sendgrid_callback_handle_spamreport',
+            'unsubscribe'       => 'sendgrid_callback_handle_unsubscribe',
+            'group_unsubscribe' => 'sendgrid_callback_handle_group_unsubscribe',
+        ];
+
+        if (!isset($parameterMap[$eventType])) {
+            return false;
+        }
+
+        return $this->toBoolean($this->coreParametersHelper->get($parameterMap[$eventType]), true);
+    }
+
+    private function toBoolean(mixed $value, bool $default = false): bool
+    {
+        if (null === $value) {
+            return $default;
+        }
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_int($value)) {
+            return 1 === $value;
+        }
+
+        if (is_string($value)) {
+            $normalized = strtolower(trim($value));
+            if (in_array($normalized, ['1', 'true', 'yes', 'on'], true)) {
+                return true;
+            }
+
+            if (in_array($normalized, ['0', 'false', 'no', 'off', ''], true)) {
+                return false;
+            }
+        }
+
+        return $default;
     }
 
     /**

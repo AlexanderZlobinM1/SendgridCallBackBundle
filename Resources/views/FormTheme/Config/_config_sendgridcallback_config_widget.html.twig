@@ -1,0 +1,19 @@
+{% block _config_sendgridcallback_config_widget %}
+    <h4 class="fw-sb mt-48 mb-xs">{{ 'sendgrid_callback.config.title'|trans }}</h4>
+    <div class="row">
+        <div class="panel panel-default mb-md">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-xs-12 mb-md">
+                        <img src="{{ asset('plugins/SendgridCallbackBundle/Assets/images/sendgrid-logo.svg') }}" alt="SendGrid" style="max-height: 44px;" />
+                    </div>
+                    {% for f in form.children %}
+                        <div class="col-xs-12">
+                            {{ form_row(f) }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
