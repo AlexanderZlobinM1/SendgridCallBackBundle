@@ -6,6 +6,7 @@ namespace MauticPlugin\SendgridCallbackBundle\Controller;
 
 use Mautic\CoreBundle\Controller\CommonController;
 use Mautic\CoreBundle\Helper\CoreParametersHelper;
+use MauticPlugin\SendgridCallbackBundle\SendgridCallbackBundle;
 use Symfony\Component\HttpFoundation\Response;
 
 class SettingsController extends CommonController
@@ -17,6 +18,7 @@ class SettingsController extends CommonController
         }
 
         $settings = [
+            'enabled'                  => $this->toBoolean($coreParametersHelper->get('sendgrid_callback_enabled'), true),
             'handle_bounce'            => $this->toBoolean($coreParametersHelper->get('sendgrid_callback_handle_bounce'), true),
             'handle_blocked'           => $this->toBoolean($coreParametersHelper->get('sendgrid_callback_handle_blocked'), true),
             'handle_dropped'           => $this->toBoolean($coreParametersHelper->get('sendgrid_callback_handle_dropped'), true),
@@ -24,6 +26,7 @@ class SettingsController extends CommonController
             'handle_unsubscribe'       => $this->toBoolean($coreParametersHelper->get('sendgrid_callback_handle_unsubscribe'), true),
             'handle_group_unsubscribe' => $this->toBoolean($coreParametersHelper->get('sendgrid_callback_handle_group_unsubscribe'), true),
             'dropped_policy'           => (string) ($coreParametersHelper->get('sendgrid_callback_dropped_policy') ?? 'auto'),
+            'version'                  => SendgridCallbackBundle::VERSION,
         ];
 
         return $this->delegateView([

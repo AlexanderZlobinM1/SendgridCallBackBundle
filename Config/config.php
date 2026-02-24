@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 return [
     'name'        => 'SendGrid Callback',
-    'description' => 'Handles SendGrid Event Webhook callbacks for bounce and complaint events.',
+    'description' => 'SendGrid callback processing for Mautic. Company: Sales Snap. Author: Alexander Zlobin. Copyright (c) Sales Snap.',
     'author'      => 'Alexander Zlobin',
-    'version'     => '1.1.0',
+    'version'     => '1.2.0',
     'menu'        => [
         'main' => [
             'sendgrid_callback.menu.root' => [
@@ -31,6 +31,7 @@ return [
         ],
     ],
     'parameters'  => [
+        'sendgrid_callback_enabled'                  => true,
         'sendgrid_callback_handle_bounce'            => true,
         'sendgrid_callback_handle_blocked'           => true,
         'sendgrid_callback_handle_dropped'           => true,

@@ -39,7 +39,7 @@ class CallbackSubscriber implements EventSubscriberInterface
 
     public function processCallbackRequest(TransportWebhookEvent $event): void
     {
-        if (!$this->isSupportedMailerScheme()) {
+        if (!$this->isPluginEnabled() || !$this->isSupportedMailerScheme()) {
             return;
         }
 
@@ -232,6 +232,11 @@ class CallbackSubscriber implements EventSubscriberInterface
         }
 
         return $this->toBoolean($this->coreParametersHelper->get($parameterMap[$eventType]), true);
+    }
+
+    private function isPluginEnabled(): bool
+    {
+        return $this->toBoolean($this->coreParametersHelper->get('sendgrid_callback_enabled'), true);
     }
 
     private function toBoolean(mixed $value, bool $default = false): bool

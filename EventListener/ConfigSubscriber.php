@@ -42,6 +42,7 @@ class ConfigSubscriber implements EventSubscriberInterface
         $config = $values['sendgridcallback_config'];
 
         $booleanFields = [
+            'sendgrid_callback_enabled',
             'sendgrid_callback_handle_bounce',
             'sendgrid_callback_handle_blocked',
             'sendgrid_callback_handle_dropped',

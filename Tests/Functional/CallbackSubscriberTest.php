@@ -126,6 +126,25 @@ class CallbackSubscriberTest extends TestCase
         self::assertSame(1, $this->invokeProcessPayload($subscriber, [$eventPayload]));
     }
 
+    public function testDisabledPluginSkipsAllEvents(): void
+    {
+        $transportCallback = $this->createMock(TransportCallback::class);
+        $transportCallback
+            ->expects(self::never())
+            ->method('addFailureByAddress');
+
+        $subscriber = $this->createSubscriber($transportCallback, [
+            'sendgrid_callback_enabled' => false,
+        ]);
+
+        $eventPayload = [
+            'event' => 'bounce',
+            'email' => 'john.doe@example.com',
+        ];
+
+        self::assertSame(0, $this->invokeProcessPayload($subscriber, [$eventPayload]));
+    }
+
     /**
      * @param array<string, mixed> $config
      */
