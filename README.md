@@ -61,11 +61,9 @@ https://mautic.example.com/mailer/callback
 - Spam Reports
 - Unsubscribes
 
-5. Open plugin settings in Mautic menu:
+5. Open plugin card in Mautic Plugins and configure settings directly in plugin modal.
 
-- `SendGrid -> Callback Settings`
-
-There you can safely enable/disable each event type and choose dropped-event mapping policy from a fixed list (`auto`, `bounced`, `unsubscribed`).
+Use the available safe controls (switches/select) to enable/disable event processing and choose dropped-event mapping policy (`auto`, `bounced`, `unsubscribed`).
 
 ## Notes
 

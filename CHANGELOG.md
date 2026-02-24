@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.3.0 - 2026-02-24
+
+- Moved all plugin settings to the plugin tile/modal form (MultiCaptcha-like flow).
+- Removed separate SendGrid settings menu and standalone settings page.
+- Added plugin meta footer directly in settings form:
+  - Company
+  - Author
+  - Plugin version
+  - Copyright
+- Kept safe selectable controls only (switches/checkboxes/select), no free-form risky fields.
+
 ## 1.2.0 - 2026-02-24
 
 - Added proper plugin tile/modal icon support via `Assets/img/icon.png` using SendGrid branding.
