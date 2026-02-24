@@ -25,15 +25,22 @@ All other events are ignored.
 
 ## Installation
 
-1. Install package in Mautic:
+1. Copy plugin directory to your Mautic installation:
 
 ```bash
-composer require azlobin/mautic-sendgrid-callback
+cp -R SendgridCallbackBundle /path/to/mautic/docroot/plugins/
 ```
 
-2. Clear cache:
+Or install from ZIP by extracting `SendgridCallbackBundle` into:
+
+```text
+/path/to/mautic/docroot/plugins/SendgridCallbackBundle
+```
+
+2. Reload plugins and clear cache:
 
 ```bash
+php bin/console mautic:plugins:reload
 php bin/console cache:clear
 ```
 
