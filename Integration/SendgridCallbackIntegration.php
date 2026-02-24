@@ -7,7 +7,6 @@ namespace MauticPlugin\SendgridCallbackBundle\Integration;
 use Mautic\CoreBundle\Form\Type\YesNoButtonGroupType;
 use Mautic\PluginBundle\Integration\AbstractIntegration;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class SendgridCallbackIntegration extends AbstractIntegration
 {
@@ -109,18 +108,22 @@ class SendgridCallbackIntegration extends AbstractIntegration
             ],
         ]);
 
-        $builder->add('sendgrid_callback_meta_footer', TextType::class, [
-            'label'      => false,
-            'required'   => false,
-            'mapped'     => false,
-            'data'       => 'Copyright 2026 Sales Snap. Alexander Zlobin All Rights Reserved.',
-            'label_attr' => ['class' => 'control-label sr-only'],
-            'attr'       => [
-                'class'    => '',
-                'readonly' => true,
-                'style'    => 'margin-top: 70px; border: 0; background: transparent; padding-left: 0; box-shadow: none; font-weight: 500; color: #4a4a4a; pointer-events: none;',
-            ],
-        ]);
+    }
+
+    /**
+     * @return string|array<string, mixed>
+     */
+    public function getFormNotes($section)
+    {
+        if ('custom' === $section) {
+            return [
+                'custom'     => true,
+                'template'   => '@SendgridCallback/Integration/footer.html.twig',
+                'parameters' => [],
+            ];
+        }
+
+        return parent::getFormNotes($section);
     }
 
     private function toBool(mixed $value): bool

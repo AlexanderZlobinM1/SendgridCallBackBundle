@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.5 - 2026-02-24
+
+- Replaced copyright footer input with plain static text in integration modal.
+- Removed `Alexander Zlobin` from footer line.
+- Kept spacing after `Active` toggle and patch-only version bump.
+
 ## 1.5.4 - 2026-02-24
 
 - Fixed spacing under `Active` toggle in integration modal (row-level margin for stable rendering).
