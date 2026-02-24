@@ -7,6 +7,10 @@ namespace MauticPlugin\SendgridCallbackBundle\Tests\Functional\EventSubscriber;
 use Mautic\CoreBundle\Helper\CoreParametersHelper;
 use Mautic\EmailBundle\Model\TransportCallback;
 use Mautic\LeadBundle\Entity\DoNotContact;
+use Mautic\PluginBundle\Entity\Integration as PluginIntegrationEntity;
+use Mautic\PluginBundle\Helper\IntegrationHelper;
+use Mautic\PluginBundle\Integration\AbstractIntegration;
+use MauticPlugin\SendgridCallbackBundle\Integration\SendgridCallbackIntegration;
 use MauticPlugin\SendgridCallbackBundle\EventSubscriber\CallbackSubscriber;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -134,7 +138,7 @@ class CallbackSubscriberTest extends TestCase
             ->method('addFailureByAddress');
 
         $subscriber = $this->createSubscriber($transportCallback, [
-            'sendgrid_callback_enabled' => false,
+            '__published' => false,
         ]);
 
         $eventPayload = [
@@ -155,9 +159,28 @@ class CallbackSubscriberTest extends TestCase
             ->method('get')
             ->willReturnCallback(static fn (string $key, mixed $default = null) => $config[$key] ?? $default);
 
+        $integrationEntity = $this->createMock(PluginIntegrationEntity::class);
+        $integrationEntity
+            ->method('getIsPublished')
+            ->willReturn($config['__published'] ?? true);
+
+        $integration = $this->createMock(AbstractIntegration::class);
+        $integration
+            ->method('getKeys')
+            ->willReturn($config);
+        $integration
+            ->method('getIntegrationSettings')
+            ->willReturn($integrationEntity);
+
+        $integrationHelper = $this->createMock(IntegrationHelper::class);
+        $integrationHelper
+            ->method('getIntegrationObject')
+            ->with(SendgridCallbackIntegration::INTEGRATION_NAME)
+            ->willReturn($integration);
+
         $logger               = $this->createMock(LoggerInterface::class);
 
-        return new CallbackSubscriber($transportCallback, $coreParametersHelper, $logger);
+        return new CallbackSubscriber($transportCallback, $coreParametersHelper, $integrationHelper, $logger);
     }
 
     /**

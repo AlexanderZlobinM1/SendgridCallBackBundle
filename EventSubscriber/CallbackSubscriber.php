@@ -9,6 +9,9 @@ use Mautic\EmailBundle\EmailEvents;
 use Mautic\EmailBundle\Event\TransportWebhookEvent;
 use Mautic\EmailBundle\Model\TransportCallback;
 use Mautic\LeadBundle\Entity\DoNotContact;
+use Mautic\PluginBundle\Helper\IntegrationHelper;
+use Mautic\PluginBundle\Integration\AbstractIntegration;
+use MauticPlugin\SendgridCallbackBundle\Integration\SendgridCallbackIntegration;
 use MauticPlugin\SendgridCallbackBundle\SendgridCallbackBundle;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -23,6 +26,7 @@ class CallbackSubscriber implements EventSubscriberInterface
     public function __construct(
         private TransportCallback $transportCallback,
         private CoreParametersHelper $coreParametersHelper,
+        private IntegrationHelper $integrationHelper,
         private LoggerInterface $logger,
     ) {
     }
@@ -195,7 +199,7 @@ class CallbackSubscriber implements EventSubscriberInterface
 
     private function resolveDroppedReason(string $reason): int
     {
-        $policy = strtolower((string) ($this->coreParametersHelper->get('sendgrid_callback_dropped_policy') ?? 'auto'));
+        $policy = strtolower((string) ($this->getIntegrationKey('sendgrid_callback_dropped_policy') ?? 'auto'));
         if (!in_array($policy, self::SUPPORTED_DROPPED_POLICIES, true)) {
             $policy = 'auto';
         }
@@ -231,12 +235,17 @@ class CallbackSubscriber implements EventSubscriberInterface
             return false;
         }
 
-        return $this->toBoolean($this->coreParametersHelper->get($parameterMap[$eventType]), true);
+        return $this->toBoolean($this->getIntegrationKey($parameterMap[$eventType]), true);
     }
 
     private function isPluginEnabled(): bool
     {
-        return $this->toBoolean($this->coreParametersHelper->get('sendgrid_callback_enabled'), true);
+        $integration = $this->getIntegrationObject();
+        if (!$integration instanceof AbstractIntegration) {
+            return false;
+        }
+
+        return (bool) $integration->getIntegrationSettings()->getIsPublished();
     }
 
     private function toBoolean(mixed $value, bool $default = false): bool
@@ -302,5 +311,24 @@ class CallbackSubscriber implements EventSubscriberInterface
     private function isAssoc(array $value): bool
     {
         return array_keys($value) !== range(0, count($value) - 1);
+    }
+
+    private function getIntegrationKey(string $key): mixed
+    {
+        $integration = $this->getIntegrationObject();
+        if (!$integration instanceof AbstractIntegration) {
+            return null;
+        }
+
+        $keys = $integration->getKeys();
+
+        return $keys[$key] ?? null;
+    }
+
+    private function getIntegrationObject(): ?AbstractIntegration
+    {
+        $integration = $this->integrationHelper->getIntegrationObject(SendgridCallbackIntegration::INTEGRATION_NAME);
+
+        return $integration instanceof AbstractIntegration ? $integration : null;
     }
 }

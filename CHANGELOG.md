@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4.0 - 2026-02-24
+
+- Reworked configuration to integration modal flow (same pattern as MultiCaptcha), no standalone Settings menu page.
+- Removed Config tab subscriber/form registration and moved runtime settings source to Integration keys.
+- Added integration modal metadata fields:
+  - Company
+  - Author
+  - Plugin version
+  - Copyright
+- Kept event toggles and dropped policy as selectable controls in the plugin modal.
+
 ## 1.3.0 - 2026-02-24
 
 - Moved all plugin settings to the plugin tile/modal form (MultiCaptcha-like flow).
