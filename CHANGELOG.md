@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0 - 2026-02-24
+
+- Updated plugin tile icon to user-provided `pngegg.png` branding asset.
+- Replaced metadata block in integration modal with plain footer text line:
+  - `Sales Snap, Alexander Zlobin, 2026`
+- Kept integration-modal settings workflow (no standalone settings menu page).
+
 ## 1.4.0 - 2026-02-24
 
 - Reworked configuration to integration modal flow (same pattern as MultiCaptcha), no standalone Settings menu page.

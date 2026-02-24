@@ -6,7 +6,6 @@ namespace MauticPlugin\SendgridCallbackBundle\Integration;
 
 use Mautic\CoreBundle\Form\Type\YesNoButtonGroupType;
 use Mautic\PluginBundle\Integration\AbstractIntegration;
-use MauticPlugin\SendgridCallbackBundle\SendgridCallbackBundle;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -100,40 +99,17 @@ class SendgridCallbackIntegration extends AbstractIntegration
             ],
         ]);
 
-        $builder->add('sendgrid_callback_meta_company', TextType::class, [
-            'label'      => 'sendgrid_callback.config.meta_company',
+        $builder->add('sendgrid_callback_meta_footer', TextType::class, [
+            'label'      => false,
             'required'   => false,
             'mapped'     => false,
-            'data'       => 'Sales Snap',
-            'label_attr' => ['class' => 'control-label'],
-            'attr'       => ['class' => 'form-control', 'readonly' => true],
-        ]);
-
-        $builder->add('sendgrid_callback_meta_author', TextType::class, [
-            'label'      => 'sendgrid_callback.config.meta_author',
-            'required'   => false,
-            'mapped'     => false,
-            'data'       => 'Alexander Zlobin',
-            'label_attr' => ['class' => 'control-label'],
-            'attr'       => ['class' => 'form-control', 'readonly' => true],
-        ]);
-
-        $builder->add('sendgrid_callback_meta_version', TextType::class, [
-            'label'      => 'sendgrid_callback.config.meta_version',
-            'required'   => false,
-            'mapped'     => false,
-            'data'       => SendgridCallbackBundle::VERSION,
-            'label_attr' => ['class' => 'control-label'],
-            'attr'       => ['class' => 'form-control', 'readonly' => true],
-        ]);
-
-        $builder->add('sendgrid_callback_meta_copyright', TextType::class, [
-            'label'      => 'sendgrid_callback.config.meta_copyright',
-            'required'   => false,
-            'mapped'     => false,
-            'data'       => 'Copyright (c) Sales Snap',
-            'label_attr' => ['class' => 'control-label'],
-            'attr'       => ['class' => 'form-control', 'readonly' => true],
+            'data'       => 'Sales Snap, Alexander Zlobin, 2026',
+            'label_attr' => ['class' => 'control-label sr-only'],
+            'attr'       => [
+                'class'    => 'form-control',
+                'readonly' => true,
+                'style'    => 'margin-top: 8px; border: 0; background: transparent; padding-left: 0; font-weight: 600;',
+            ],
         ]);
     }
 
