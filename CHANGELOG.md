@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.1 - 2026-02-24
+
+- Added explicit integration icon override via `getIcon()` to force tile icon path.
+- Added fallback integration icon file `Assets/img/sendgridcallback.png`.
+- Bumped patch version only.
+
 ## 1.5.0 - 2026-02-24
 
 - Updated plugin tile icon to user-provided `pngegg.png` branding asset.

@@ -23,6 +23,11 @@ class SendgridCallbackIntegration extends AbstractIntegration
         return 'SendGrid Callback';
     }
 
+    public function getIcon(): string
+    {
+        return 'plugins/SendgridCallbackBundle/Assets/img/icon.png';
+    }
+
     public function getAuthenticationType(): string
     {
         return 'none';
