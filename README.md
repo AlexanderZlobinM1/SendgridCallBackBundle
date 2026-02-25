@@ -28,7 +28,13 @@ All other events are ignored.
 
 ## Installation
 
-1. Copy plugin directory to your Mautic installation:
+1. Install via Composer:
+
+```bash
+composer require azlobin/mautic-sendgrid-callback
+```
+
+Or copy plugin directory to your Mautic installation:
 
 ```bash
 cp -R SendgridCallbackBundle /path/to/mautic/docroot/plugins/

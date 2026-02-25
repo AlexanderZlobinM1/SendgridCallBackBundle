@@ -3,6 +3,7 @@
     "description": "Mautic plugin to process SendGrid Event Webhook callbacks for bounce and complaint handling.",
     "type": "mautic-plugin",
     "license": "MIT",
+    "homepage": "https://github.com/AlexanderZlobinM1/SendgridCallBackBundle",
     "authors": [
         {
             "name": "Alexander Zlobin"
@@ -30,7 +31,5 @@
     },
     "extra": {
         "install-directory-name": "SendgridCallbackBundle"
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    }
 }

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.6 - 2026-02-24
+
+- Prepared package for Packagist/Composer publication.
+- Removed `minimum-stability: dev` and `prefer-stable` from `composer.json` for stable tagged installs.
+- Added `homepage` in `composer.json`.
+- Added Composer install command to README:
+  - `composer require azlobin/mautic-sendgrid-callback`
+
 ## 1.5.5 - 2026-02-24
 
 - Replaced copyright footer input with plain static text in integration modal.

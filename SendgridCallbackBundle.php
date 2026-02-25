@@ -8,7 +8,7 @@ use Mautic\IntegrationsBundle\Bundle\AbstractPluginBundle;
 
 class SendgridCallbackBundle extends AbstractPluginBundle
 {
-    public const VERSION = '1.5.5';
+    public const VERSION = '1.5.6';
 
     public const SUPPORTED_MAILER_SCHEMES = [
         'sendgrid',
