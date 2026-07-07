@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.7 - 2026-07-07
+
+- Added Sales Snap footer link to `sales-snap.com` in the integration modal.
+
 ## 1.5.6 - 2026-02-24
 
 - Prepared package for Packagist/Composer publication.
