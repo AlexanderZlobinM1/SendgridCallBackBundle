@@ -71,6 +71,9 @@ https://mautic.example.com/mailer/callback
 
 Use the available safe controls (switches/select) to enable/disable event processing and choose dropped-event mapping policy (`auto`, `bounced`, `unsubscribed`).
 
+When the plugin is inactive, SendGrid webhook payloads are ignored and no Do
+Not Contact records are created or changed by this plugin.
+
 ## Notes
 
 - The plugin tries to extract `X-EMAIL-ID` from `custom_args` or `unique_args` in webhook payload to link callback to email ID.

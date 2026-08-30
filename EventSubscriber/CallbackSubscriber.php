@@ -96,6 +96,10 @@ class CallbackSubscriber implements EventSubscriberInterface
      */
     private function processPayload(array $payload): int
     {
+        if (!$this->isPluginEnabled()) {
+            return 0;
+        }
+
         if ($this->isAssoc($payload)) {
             return $this->processEvent($payload);
         }

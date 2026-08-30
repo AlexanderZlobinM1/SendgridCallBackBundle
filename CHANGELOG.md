@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.8 - 2026-08-30
+
+- Added a defensive publication-state check inside payload processing.
+- Ensured an inactive plugin cannot create or update Do Not Contact records,
+  including when payload processing is invoked outside the normal webhook entry
+  point.
+- Confirmed the inactive-plugin behavior with the existing regression test.
+- Declared PHPUnit as a development dependency so the regression suite can be
+  installed and run without modifying the package manifest locally.
+
 ## 1.5.7 - 2026-07-07
 
 - Added Sales Snap footer link to `sales-snap.com` in the integration modal.
