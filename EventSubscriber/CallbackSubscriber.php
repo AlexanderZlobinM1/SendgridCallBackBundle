@@ -28,6 +28,7 @@ class CallbackSubscriber implements EventSubscriberInterface
         private CoreParametersHelper $coreParametersHelper,
         private IntegrationHelper $integrationHelper,
         private LoggerInterface $logger,
+        private ?\MauticPlugin\SendgridCallbackBundle\Model\DncFeedback $feedback = null,
     ) {
     }
 
@@ -38,7 +39,20 @@ class CallbackSubscriber implements EventSubscriberInterface
     {
         return [
             EmailEvents::ON_TRANSPORT_WEBHOOK => 'processCallbackRequest',
+            EmailEvents::EMAIL_ON_SEND => 'prepareAttribution',
         ];
+    }
+
+    public function prepareAttribution(\Mautic\EmailBundle\Event\EmailSendEvent $event): void
+    {
+        if (!$this->isPluginEnabled() || !$this->isSupportedMailerScheme()) {
+            return;
+        }
+        $id = $event->getEmail()?->getId();
+        if (null === $this->positiveId($id)) {
+            return;
+        }
+        $event->addTextHeader('X-EMAIL-ID', (string) $id);
     }
 
     public function processCallbackRequest(TransportWebhookEvent $event): void
@@ -66,7 +80,7 @@ class CallbackSubscriber implements EventSubscriberInterface
             $event->setResponse(new Response(sprintf('SendGrid Callback processed (%d)', $processed)));
         } catch (\Throwable $exception) {
             $this->logger->error('Failed to process SendGrid payload: '.$exception->getMessage());
-            $event->setResponse(new Response('Bad Request', Response::HTTP_BAD_REQUEST));
+            $event->setResponse(new Response('Bad Request', Response::HTTP_SERVICE_UNAVAILABLE));
         }
     }
 
@@ -123,7 +137,11 @@ class CallbackSubscriber implements EventSubscriberInterface
     private function processEvent(array $payload): int
     {
         $eventType = strtolower((string) ($payload['event'] ?? ''));
-        $email     = (string) ($payload['email'] ?? '');
+        $email = (string) ($payload['email'] ?? '');
+
+        if ('bounce' === $eventType && 'blocked' === strtolower((string) ($payload['type'] ?? ''))) {
+            $eventType = 'blocked'; // Respect the existing blocked-event switch.
+        }
 
         if ('' === $eventType || '' === $email || !$this->isEventEnabled($eventType)) {
             return 0;
@@ -132,10 +150,13 @@ class CallbackSubscriber implements EventSubscriberInterface
         try {
             $address = Address::create($email)->getAddress();
             $emailId = $this->getEmailId($payload);
-            $reason  = $this->buildReason($payload, $eventType);
+            if (null === $emailId) {
+                $this->logger->warning('Provider feedback lacks a valid Mautic email ID; applying contact-level DNC only.');
+            }
+            $reason = $this->buildReason($payload, $eventType);
 
             if (in_array($eventType, ['bounce', 'blocked'], true)) {
-                $this->transportCallback->addFailureByAddress(
+                ($this->feedback ?? $this->transportCallback)->addFailureByAddress(
                     $address,
                     $reason,
                     DoNotContact::BOUNCED,
@@ -149,7 +170,7 @@ class CallbackSubscriber implements EventSubscriberInterface
 
             if ('dropped' === $eventType) {
                 $dncReason = $this->resolveDroppedReason($reason);
-                $this->transportCallback->addFailureByAddress(
+                ($this->feedback ?? $this->transportCallback)->addFailureByAddress(
                     $address,
                     $reason,
                     $dncReason,
@@ -162,7 +183,7 @@ class CallbackSubscriber implements EventSubscriberInterface
             }
 
             if (in_array($eventType, ['spamreport', 'unsubscribe', 'group_unsubscribe'], true)) {
-                $this->transportCallback->addFailureByAddress(
+                ($this->feedback ?? $this->transportCallback)->addFailureByAddress(
                     $address,
                     $reason,
                     DoNotContact::UNSUBSCRIBED,
@@ -173,7 +194,7 @@ class CallbackSubscriber implements EventSubscriberInterface
 
                 return 1;
             }
-        } catch (\Throwable $exception) {
+        } catch (\Symfony\Component\Mime\Exception\RfcComplianceException $exception) {
             $this->logger->warning('Skipping invalid SendGrid event: '.$exception->getMessage());
         }
 
@@ -227,11 +248,11 @@ class CallbackSubscriber implements EventSubscriberInterface
     private function isEventEnabled(string $eventType): bool
     {
         $parameterMap = [
-            'bounce'            => 'sendgrid_callback_handle_bounce',
-            'blocked'           => 'sendgrid_callback_handle_blocked',
-            'dropped'           => 'sendgrid_callback_handle_dropped',
-            'spamreport'        => 'sendgrid_callback_handle_spamreport',
-            'unsubscribe'       => 'sendgrid_callback_handle_unsubscribe',
+            'bounce' => 'sendgrid_callback_handle_bounce',
+            'blocked' => 'sendgrid_callback_handle_blocked',
+            'dropped' => 'sendgrid_callback_handle_dropped',
+            'spamreport' => 'sendgrid_callback_handle_spamreport',
+            'unsubscribe' => 'sendgrid_callback_handle_unsubscribe',
             'group_unsubscribe' => 'sendgrid_callback_handle_group_unsubscribe',
         ];
 
@@ -283,30 +304,38 @@ class CallbackSubscriber implements EventSubscriberInterface
     /**
      * @param array<string, mixed> $payload
      */
-    private function getEmailId(array $payload): ?string
+    private function getEmailId(array $payload): ?int
     {
-        foreach (['custom_args', 'unique_args'] as $argKey) {
-            if (!isset($payload[$argKey]) || !is_array($payload[$argKey])) {
+        foreach ([$payload, $payload['custom_args'] ?? [], $payload['unique_args'] ?? []] as $args) {
+            if (!is_array($args)) {
                 continue;
             }
-
-            foreach ($payload[$argKey] as $key => $value) {
-                if (0 === strcasecmp((string) $key, 'X-EMAIL-ID') && is_scalar($value)) {
-                    $emailId = (string) $value;
-
-                    return ctype_digit($emailId) ? $emailId : null;
+            foreach ($args as $key => $value) {
+                if (0 === strcasecmp((string) $key, 'X-EMAIL-ID')) {
+                    $id = $this->positiveId($value);
+                    if (null !== $id) {
+                        return $id;
+                    }
                 }
             }
         }
-
-        if (isset($payload['smtp-id']) && is_scalar($payload['smtp-id'])) {
-            $smtpId = (string) $payload['smtp-id'];
-            if (preg_match('/X-EMAIL-ID[:=]([0-9]+)/i', $smtpId, $matches)) {
-                return $matches[1];
-            }
+        // Historical explicit marker only; provider message IDs are never Mautic IDs.
+        if (is_string($payload['smtp-id'] ?? null)
+            && preg_match('/(?:^|[^A-Za-z0-9])X-EMAIL-ID[:=]([1-9][0-9]*)(?![0-9])/i', $payload['smtp-id'], $m)) {
+            return $this->positiveId($m[1]);
         }
 
         return null;
+    }
+
+    private function positiveId(mixed $value): ?int
+    {
+        if ((!is_string($value) && !is_int($value)) || !preg_match('/^[1-9][0-9]*$/D', (string) $value)) {
+            return null;
+        }
+        $id = filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+        return false === $id ? null : $id;
     }
 
     /**

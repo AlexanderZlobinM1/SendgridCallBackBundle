@@ -10,8 +10,8 @@ use Mautic\LeadBundle\Entity\DoNotContact;
 use Mautic\PluginBundle\Entity\Integration as PluginIntegrationEntity;
 use Mautic\PluginBundle\Helper\IntegrationHelper;
 use Mautic\PluginBundle\Integration\AbstractIntegration;
-use MauticPlugin\SendgridCallbackBundle\Integration\SendgridCallbackIntegration;
 use MauticPlugin\SendgridCallbackBundle\EventSubscriber\CallbackSubscriber;
+use MauticPlugin\SendgridCallbackBundle\Integration\SendgridCallbackIntegration;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -33,10 +33,10 @@ class CallbackSubscriberTest extends TestCase
         $subscriber = $this->createSubscriber($transportCallback);
 
         $eventPayload = [
-            'event'       => 'bounce',
-            'email'       => 'john.doe@example.com',
-            'reason'      => 'mailbox not found',
-            'status'      => '5.1.1',
+            'event' => 'bounce',
+            'email' => 'john.doe@example.com',
+            'reason' => 'mailbox not found',
+            'status' => '5.1.1',
             'custom_args' => ['X-EMAIL-ID' => '42'],
         ];
 
@@ -61,7 +61,7 @@ class CallbackSubscriberTest extends TestCase
         $eventPayload = [
             'event' => 'unsubscribe',
             'email' => 'john.doe@example.com',
-            'type'  => 'unsubscribe',
+            'type' => 'unsubscribe',
         ];
 
         self::assertSame(1, $this->invokeProcessPayload($subscriber, [$eventPayload]));
@@ -96,8 +96,8 @@ class CallbackSubscriberTest extends TestCase
         ]);
 
         $eventPayload = [
-            'event'  => 'bounce',
-            'email'  => 'john.doe@example.com',
+            'event' => 'bounce',
+            'email' => 'john.doe@example.com',
             'reason' => 'mailbox not found',
         ];
 
@@ -122,8 +122,8 @@ class CallbackSubscriberTest extends TestCase
         ]);
 
         $eventPayload = [
-            'event'  => 'dropped',
-            'email'  => 'john.doe@example.com',
+            'event' => 'dropped',
+            'email' => 'john.doe@example.com',
             'reason' => 'mailbox full',
         ];
 
@@ -147,6 +147,46 @@ class CallbackSubscriberTest extends TestCase
         ];
 
         self::assertSame(0, $this->invokeProcessPayload($subscriber, [$eventPayload]));
+    }
+
+    public function testDatabaseFailurePropagatesInsteadOfAcknowledgingLostEvent(): void
+    {
+        $callback = $this->createMock(TransportCallback::class);
+        $callback->method('addFailureByAddress')->willThrowException(new \RuntimeException('database unavailable'));
+        $subscriber = $this->createSubscriber($callback);
+        $this->expectException(\RuntimeException::class);
+        $this->invokeProcessPayload($subscriber, [['event' => 'bounce', 'email' => 'a@example.com']]);
+    }
+
+    public function testProviderIdsAreNeverMauticEmailIds(): void
+    {
+        $callback = $this->createMock(TransportCallback::class);
+        $callback->expects(self::once())->method('addFailureByAddress')->with('a@example.com', self::anything(), DoNotContact::BOUNCED, null);
+        $subscriber = $this->createSubscriber($callback);
+        $this->invokeProcessPayload($subscriber, [['event' => 'bounce', 'email' => 'a@example.com'] + ['message_id' => '42', 'x_track_id' => '42', 'smtp-id' => '42']]);
+    }
+
+    public function testValidTopLevelEmailIdOverridesMalformedNestedValue(): void
+    {
+        $callback = $this->createMock(TransportCallback::class);
+        $callback->expects(self::once())->method('addFailureByAddress')->with('a@example.com', self::anything(), DoNotContact::BOUNCED, 42);
+        $subscriber = $this->createSubscriber($callback);
+        $this->invokeProcessPayload($subscriber, [['event' => 'bounce', 'email' => 'a@example.com'] + ['X-EMAIL-ID' => '42', 'custom_args' => ['X-EMAIL-ID' => '0']]]);
+    }
+
+    public function testOverflowEmailIdCannotBeAttributed(): void
+    {
+        $callback = $this->createMock(TransportCallback::class);
+        $callback->expects(self::once())->method('addFailureByAddress')->with('a@example.com', self::anything(), DoNotContact::BOUNCED, null);
+        $subscriber = $this->createSubscriber($callback);
+        $this->invokeProcessPayload($subscriber, [['event' => 'bounce', 'email' => 'a@example.com'] + ['X-EMAIL-ID' => '99999999999999999999999']]);
+    }
+
+    public function testBlockedBounceUsesBlockedSwitch(): void
+    {
+        $callback = $this->createMock(TransportCallback::class);
+        $callback->expects(self::never())->method('addFailureByAddress');
+        self::assertSame(0, $this->invokeProcessPayload($this->createSubscriber($callback, ['sendgrid_callback_handle_blocked' => false]), [['event' => 'bounce', 'type' => 'blocked', 'email' => 'a@example.com']]));
     }
 
     /**
@@ -178,7 +218,7 @@ class CallbackSubscriberTest extends TestCase
             ->with(SendgridCallbackIntegration::INTEGRATION_NAME)
             ->willReturn($integration);
 
-        $logger               = $this->createMock(LoggerInterface::class);
+        $logger = $this->createMock(LoggerInterface::class);
 
         return new CallbackSubscriber($transportCallback, $coreParametersHelper, $integrationHelper, $logger);
     }

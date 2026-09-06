@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.10] - 2026-09-06
+
+- Serialize callback DNC updates per contact, ignore repeated feedback and preserve unsubscribe state and original email attribution.
+
+- Preserve outgoing SendGrid custom arguments, accept top-level webhook attribution, reject invalid IDs and surface callback database failures. Route blocked bounce types through the existing switch.
+- Audit and regression coverage against managed SES 1.0.38.x; see `LINEAGE_AUDIT.md`.
+
 ## 1.5.9 — 2026-09-06
 
 - Support Mautic 7.2 while retaining the declared older Mautic versions.

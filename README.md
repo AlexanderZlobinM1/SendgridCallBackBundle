@@ -78,3 +78,7 @@ Not Contact records are created or changed by this plugin.
 
 - The plugin tries to extract `X-EMAIL-ID` from `custom_args` or `unique_args` in webhook payload to link callback to email ID.
 - If `X-EMAIL-ID` is missing, callback still marks contact by email address.
+
+## Release 1.5.10 attribution and retries
+
+The plugin preserves Mautic email IDs in outgoing SendGrid API metadata and SMTP `X-SMTPAPI.unique_args`, merging existing metadata. It accepts top-level, `custom_args` and `unique_args` webhook formats, validates positive non-overflowing IDs, and warns when only contact-level DNC can be updated. `bounce` with `type=blocked` follows the existing blocked-event switch. Database failures now return HTTP 503 rather than silently acknowledging the event. See `LINEAGE_AUDIT.md`.
