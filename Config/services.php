@@ -14,6 +14,9 @@ return function (ContainerConfigurator $configurator): void {
 
     $excludes = [];
 
+    // Legacy config.php treats FQCN arguments as strings, not service references.
+    $services->alias('sendgridcallbackbundle.helper.encryption', \Mautic\CoreBundle\Helper\EncryptionHelper::class);
+
     $services->load('MauticPlugin\\SendgridCallbackBundle\\', '../')
         ->exclude('../{'.implode(',', array_merge(MauticCoreExtension::DEFAULT_EXCLUDES, $excludes)).'}');
 };
