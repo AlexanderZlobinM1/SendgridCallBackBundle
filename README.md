@@ -4,6 +4,8 @@ Plugin for Mautic 5/6/7 to process SendGrid Event Webhook callbacks and mark con
 
 This plugin does not send email. Email sending is handled by Symfony's standard SendGrid mailer transport configured in Mautic.
 
+The Composer package installs the Symfony SendGrid Mailer bridge automatically. Configure the transport in Mautic with a `sendgrid+api://` or `sendgrid+smtp://` DSN after installation.
+
 Company: Sales Snap  
 Author: Alexander Zlobin
 

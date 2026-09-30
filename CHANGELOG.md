@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.11] - 2026-09-30
+
+- Added `symfony/sendgrid-mailer` as a runtime dependency.
+- `composer require azlobin/mautic-sendgrid-callback` now installs the Symfony SendGrid Mailer bridge when it is not already present.
+- Kept the dependency range compatible with Mautic 5, 6 and 7.
+
 ## [1.5.10] - 2026-09-06
 
 - Serialize callback DNC updates per contact, ignore repeated feedback and preserve unsubscribe state and original email attribution.
